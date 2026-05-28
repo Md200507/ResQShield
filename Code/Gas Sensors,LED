@@ -1,0 +1,145 @@
+// ==========================================
+// ESP32 + MQ2 + MQ7 + 3 LEDs
+// ==========================================
+
+// ----------------------
+// SENSOR PINS
+// ----------------------
+#define MQ2_PIN 34
+#define MQ7_PIN 35
+
+// ----------------------
+// LED PINS
+// ----------------------
+#define GREEN_LED 25
+#define YELLOW_LED 26
+#define RED_LED 27
+
+// ----------------------
+// VARIABLES
+// ----------------------
+int mq2Value = 0;
+int mq7Value = 0;
+
+float mq2Voltage = 0.0;
+float mq7Voltage = 0.0;
+
+// ==========================================
+// SETUP
+// ==========================================
+
+void setup()
+{
+    Serial.begin(115200);
+
+    // LED OUTPUTS
+    pinMode(GREEN_LED, OUTPUT);
+    pinMode(YELLOW_LED, OUTPUT);
+    pinMode(RED_LED, OUTPUT);
+
+    // Initially OFF
+    digitalWrite(GREEN_LED, LOW);
+    digitalWrite(YELLOW_LED, LOW);
+    digitalWrite(RED_LED, LOW);
+
+    Serial.println("================================");
+    Serial.println("FIRE FIGHTER GAS MONITORING");
+    Serial.println("================================");
+}
+
+// ==========================================
+// LOOP
+// ==========================================
+
+void loop()
+{
+    // --------------------------------
+    // READ SENSOR VALUES
+    // --------------------------------
+
+    mq2Value = analogRead(MQ2_PIN);
+    mq7Value = analogRead(MQ7_PIN);
+
+    // --------------------------------
+    // ADC TO VOLTAGE
+    // --------------------------------
+
+    mq2Voltage = (mq2Value * 3.3) / 4095.0;
+    mq7Voltage = (mq7Value * 3.3) / 4095.0;
+
+    // --------------------------------
+    // DISPLAY VALUES
+    // --------------------------------
+
+    Serial.println("--------------------------------");
+
+    Serial.print("MQ2 ADC : ");
+    Serial.print(mq2Value);
+    Serial.print(" | Voltage : ");
+    Serial.print(mq2Voltage);
+    Serial.println(" V");
+
+    Serial.print("MQ7 ADC : ");
+    Serial.print(mq7Value);
+    Serial.print(" | Voltage : ");
+    Serial.print(mq7Voltage);
+    Serial.println(" V");
+
+    // --------------------------------
+    // RESET LEDs
+    // --------------------------------
+
+    digitalWrite(GREEN_LED, LOW);
+    digitalWrite(YELLOW_LED, LOW);
+    digitalWrite(RED_LED, LOW);
+
+    // =========================================
+    // HIGH ALERT
+    // =========================================
+
+    if (mq2Value > 3200 || mq7Value > 2600)
+    {
+        digitalWrite(RED_LED, HIGH);
+
+        Serial.println("HIGH ALERT");
+    }
+
+    // =========================================
+    // MEDIUM ALERT
+    // =========================================
+
+    else if (mq2Value > 2200 || mq7Value > 1600)
+    {
+        digitalWrite(YELLOW_LED, HIGH);
+
+        Serial.println("MEDIUM ALERT");
+    }
+
+    // =========================================
+    // LOW ALERT
+    // =========================================
+
+    else if (mq2Value > 1200 || mq7Value > 800)
+    {
+        digitalWrite(GREEN_LED, HIGH);
+
+        Serial.println("LOW ALERT");
+    }
+
+    // =========================================
+    // SAFE CONDITION
+    // =========================================
+
+    else
+    {
+        digitalWrite(GREEN_LED, HIGH);
+
+        Serial.println("SAFE ENVIRONMENT");
+    }
+
+    // --------------------------------
+    // WAIT 2 SECONDS
+    // --------------------------------
+
+    delay(2000);
+}
